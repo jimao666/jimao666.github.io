@@ -140,6 +140,13 @@ for program in programs:
     #             "url": data["url"]
     #         })
 
+# 再次将符合条件的ipv4数据写入ipv4.json，覆盖之前的内容
+with open("./code/ipv4.json", "w", encoding="utf-8") as file:
+    final_output_data = {
+        "tvshow": normal_ipv4
+    }
+    json.dump(final_output_data, file, ensure_ascii=False, indent=4)
+
 # with open("./code/ipv4normal.json", "w", encoding="utf-8") as file:
 #     json.dump(normal_ipv4, file, ensure_ascii=False, indent=4)
 
