@@ -1,0 +1,787 @@
+
+html_code = '''<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>老黄历 - 传统择吉日历</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #1a5f3f;
+            --light-green: #2d7a5f;
+            --paper-bg: #f5f5dc;
+            --paper-texture: #e8e4d9;
+        }
+        
+        body {
+            font-family: 'Noto Serif SC', serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .calendar-container {
+            perspective: 1500px;
+            transform-style: preserve-3d;
+        }
+        
+        .calendar-page {
+            background: linear-gradient(145deg, var(--paper-bg) 0%, var(--paper-texture) 100%);
+            box-shadow: 
+                0 20px 60px rgba(0,0,0,0.5),
+                inset 0 0 100px rgba(26, 95, 63, 0.05);
+            border: 8px solid var(--primary-green);
+            position: relative;
+            overflow: hidden;
+            transform-origin: left center;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .calendar-page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 28px,
+                    rgba(26, 95, 63, 0.03) 28px,
+                    rgba(26, 95, 63, 0.03) 29px
+                );
+            pointer-events: none;
+        }
+        
+        .calendar-page.flipping-next {
+            animation: flipNext 0.8s ease-in-out;
+        }
+        
+        .calendar-page.flipping-prev {
+            animation: flipPrev 0.8s ease-in-out;
+        }
+        
+        @keyframes flipNext {
+            0% { transform: rotateY(0deg); }
+            50% { transform: rotateY(-90deg); opacity: 0.8; }
+            100% { transform: rotateY(0deg); }
+        }
+        
+        @keyframes flipPrev {
+            0% { transform: rotateY(0deg); }
+            50% { transform: rotateY(90deg); opacity: 0.8; }
+            100% { transform: rotateY(0deg); }
+        }
+        
+        .header-border {
+            border: 3px solid var(--primary-green);
+            position: relative;
+        }
+        
+        .header-border::after {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border: 1px solid var(--primary-green);
+        }
+        
+        .big-date {
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 12rem;
+            color: var(--primary-green);
+            text-shadow: 4px 4px 8px rgba(0,0,0,0.1);
+            line-height: 0.8;
+            filter: drop-shadow(0 0 20px rgba(26, 95, 63, 0.2));
+        }
+        
+        .lunar-text {
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            letter-spacing: 0.3em;
+        }
+        
+        .yi-ji-box {
+            border: 2px solid var(--primary-green);
+            background: rgba(26, 95, 63, 0.05);
+            position: relative;
+        }
+        
+        .yi-ji-box::before {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            right: 4px;
+            bottom: 4px;
+            border: 1px solid var(--primary-green);
+            opacity: 0.3;
+        }
+        
+        .yi-label {
+            background: var(--primary-green);
+            color: white;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            padding: 8px 4px;
+            font-weight: bold;
+            letter-spacing: 0.2em;
+        }
+        
+        .ji-label {
+            background: #8b4513;
+            color: white;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            padding: 8px 4px;
+            font-weight: bold;
+            letter-spacing: 0.2em;
+        }
+        
+        .ganzhi-box {
+            border: 2px solid var(--primary-green);
+            background: linear-gradient(135deg, rgba(26,95,63,0.1) 0%, transparent 100%);
+        }
+        
+        .star-badge {
+            background: var(--primary-green);
+            color: white;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .animal-icon {
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--primary-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: white;
+        }
+        
+        .time-slot {
+            border: 1px solid var(--primary-green);
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            background: rgba(26,95,63,0.05);
+        }
+        
+        .time-slot.lucky {
+            background: var(--primary-green);
+            color: white;
+        }
+        
+        .control-btn {
+            background: linear-gradient(145deg, var(--primary-green), var(--light-green));
+            border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(26,95,63,0.4);
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26,95,63,0.6);
+        }
+        
+        .control-btn:active {
+            transform: translateY(0);
+        }
+        
+        .date-picker-modal {
+            backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.8);
+        }
+        
+        .picker-wheel {
+            background: linear-gradient(145deg, #2a2a3a, #1a1a2e);
+            border: 2px solid var(--primary-green);
+        }
+        
+        .picker-item {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .picker-item:hover {
+            background: rgba(26,95,63,0.3);
+        }
+        
+        .picker-item.selected {
+            background: var(--primary-green);
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .corner-decoration {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--primary-green);
+        }
+        
+        .corner-tl { top: 10px; left: 10px; border-right: 0; border-bottom: 0; }
+        .corner-tr { top: 10px; right: 10px; border-left: 0; border-bottom: 0; }
+        .corner-bl { bottom: 10px; left: 10px; border-right: 0; border-top: 0; }
+        .corner-br { bottom: 10px; right: 10px; border-left: 0; border-top: 0; }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .glow-effect {
+            box-shadow: 0 0 30px rgba(26, 95, 63, 0.3);
+        }
+        
+        .lunar-festival {
+            background: linear-gradient(90deg, transparent, rgba(139, 69, 19, 0.2), transparent);
+            color: #8b4513;
+            font-weight: bold;
+        }
+        
+        .solar-term {
+            background: var(--primary-green);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+        }
+        
+        /* Scrollbar styling for picker */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: var(--primary-green);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+    <div class="w-full max-w-4xl">
+        <!-- Header Controls -->
+        <div class="flex justify-between items-center mb-6 px-4">
+            <div class="text-white/80 text-sm">
+                <span class="text-emerald-400">●</span> 传统黄历
+            </div>
+            <button onclick="openDatePicker()" class="control-btn text-white px-6 py-2 rounded-full flex items-center gap-2 font-bold">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                选择日期
+            </button>
+        </div>
+
+        <!-- Main Calendar -->
+        <div class="calendar-container">
+            <div id="calendarPage" class="calendar-page rounded-lg p-6 md:p-8 relative">
+                <!-- Corner Decorations -->
+                <div class="corner-decoration corner-tl"></div>
+                <div class="corner-decoration corner-tr"></div>
+                <div class="corner-decoration corner-bl"></div>
+                <div class="corner-decoration corner-br"></div>
+
+                <!-- Top Header -->
+                <div class="header-border p-3 mb-6 flex justify-between items-center bg-gradient-to-r from-transparent via-emerald-50 to-transparent">
+                    <div class="flex items-center gap-4">
+                        <div class="text-2xl md:text-3xl font-black text-emerald-800 tracking-widest" id="monthEn">FEBRUARY</div>
+                        <div class="text-3xl md:text-4xl font-black text-emerald-800" id="yearDisplay">2026</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="text-xl md:text-2xl font-bold text-emerald-800" id="monthCn">二月</div>
+                        <div class="text-sm text-emerald-600 border border-emerald-600 px-2 py-1 rounded">平</div>
+                    </div>
+                </div>
+
+                <!-- Main Content Grid -->
+                <div class="grid grid-cols-12 gap-4">
+                    <!-- Left Side: Big Date -->
+                    <div class="col-span-12 md:col-span-5 flex flex-col items-center justify-center relative">
+                        <div class="big-date float-animation" id="bigDate">5</div>
+                        <div class="absolute top-0 right-0 lunar-text text-emerald-800 font-bold text-lg h-full flex items-center">
+                            <span id="lunarMonth">腊月</span>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <div class="text-emerald-700 font-bold text-lg" id="weekDay">星期四</div>
+                            <div class="text-emerald-600 text-sm mt-1" id="weekDayEn">THURSDAY</div>
+                        </div>
+                    </div>
+
+                    <!-- Right Side: Details -->
+                    <div class="col-span-12 md:col-span-7 space-y-4">
+                        <!-- Lunar Date & Solar Term -->
+                        <div class="flex items-center justify-between border-b-2 border-emerald-800/20 pb-2">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl font-bold text-emerald-800" id="lunarDate">十八日</span>
+                                <span class="solar-term" id="solarTerm">初二雨水</span>
+                            </div>
+                            <div class="text-sm text-emerald-700" id="ninePeriod">六九第二天</div>
+                        </div>
+
+                        <!-- Yi/Ji Section -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="yi-ji-box flex">
+                                <div class="yi-label">宜</div>
+                                <div class="flex-1 p-3 text-sm text-emerald-800 leading-relaxed" id="yiContent">
+                                    安门 求学<br>嫁娶 祈福
+                                </div>
+                            </div>
+                            <div class="yi-ji-box flex">
+                                <div class="ji-label">忌</div>
+                                <div class="flex-1 p-3 text-sm text-amber-900 leading-relaxed" id="jiContent">
+                                    经络 会友<br>出行 安葬
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- GanZhi & Gods -->
+                        <div class="ganzhi-box p-3 grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="font-bold text-emerald-800">天干</span>
+                                    <span class="px-2 py-1 bg-emerald-100 rounded" id="gan">庚</span>
+                                    <span class="text-xs text-emerald-600">属金</span>
+                                </div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="font-bold text-emerald-800">地支</span>
+                                    <span class="px-2 py-1 bg-emerald-100 rounded" id="zhi">戌</span>
+                                    <span class="text-xs text-emerald-600">属土</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-emerald-800">纳音</span>
+                                    <span class="px-2 py-1 bg-amber-100 rounded text-amber-800" id="nayin">钗钏金</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="star-badge">吉</span>
+                                    <span class="text-emerald-800 font-bold" id="luckyStar">三合 天喜</span>
+                                </div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-xs bg-emerald-800 text-white px-2 py-1 rounded">28宿</span>
+                                    <span class="text-emerald-800" id="xiu">角宿</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs bg-emerald-800 text-white px-2 py-1 rounded">十二神</span>
+                                    <span class="text-emerald-800 font-bold text-lg" id="shen">成日</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lucky Directions -->
+                        <div class="border-2 border-emerald-800/30 p-3 rounded">
+                            <div class="text-xs text-emerald-600 mb-2 font-bold">吉祥方位</div>
+                            <div class="grid grid-cols-3 gap-2 text-sm">
+                                <div class="text-center">
+                                    <div class="text-xs text-emerald-500">喜神</div>
+                                    <div class="font-bold text-emerald-800" id="xiShen">西北</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-xs text-emerald-500">贵神</div>
+                                    <div class="font-bold text-emerald-800" id="guiShen">西南</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-xs text-emerald-500">财神</div>
+                                    <div class="font-bold text-emerald-800" id="caiShen">正东</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Time Slots -->
+                        <div class="border-t-2 border-emerald-800/20 pt-3">
+                            <div class="text-xs text-emerald-600 mb-2 font-bold">时辰吉凶</div>
+                            <div class="grid grid-cols-6 gap-1 text-center text-xs" id="timeSlots">
+                                <!-- Generated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Info -->
+                <div class="mt-6 pt-4 border-t-2 border-emerald-800/20 flex justify-between items-center text-xs text-emerald-700">
+                    <div class="flex items-center gap-4">
+                        <span>农历 <span id="fullLunar">乙巳年十二月小</span></span>
+                        <span class="animal-icon text-2xl">🐕</span>
+                        <span>冲龙煞北</span>
+                    </div>
+                    <div class="text-right">
+                        <div>彭祖百忌：庚不经络 戌不吃犬</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex justify-center gap-4 mt-8">
+            <button onclick="changeDate(-1)" class="control-btn text-white w-14 h-14 rounded-full flex items-center justify-center text-2xl">
+                ←
+            </button>
+            <button onclick="goToToday()" class="control-btn text-white px-8 py-3 rounded-full font-bold">
+                回到今天
+            </button>
+            <button onclick="changeDate(1)" class="control-btn text-white w-14 h-14 rounded-full flex items-center justify-center text-2xl">
+                →
+            </button>
+        </div>
+
+        <!-- Date Picker Modal -->
+        <div id="datePickerModal" class="fixed inset-0 date-picker-modal hidden z-50 flex items-center justify-center p-4">
+            <div class="picker-wheel rounded-2xl p-6 w-full max-w-md transform transition-all scale-100">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-white text-xl font-bold">选择日期</h3>
+                    <button onclick="closeDatePicker()" class="text-white/60 hover:text-white text-2xl">&times;</button>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div>
+                        <div class="text-emerald-400 text-xs mb-2 text-center">年</div>
+                        <div class="h-48 overflow-y-auto custom-scroll bg-black/20 rounded-lg" id="yearList">
+                            <!-- Years -->
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-emerald-400 text-xs mb-2 text-center">月</div>
+                        <div class="h-48 overflow-y-auto custom-scroll bg-black/20 rounded-lg" id="monthList">
+                            <!-- Months -->
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-emerald-400 text-xs mb-2 text-center">日</div>
+                        <div class="h-48 overflow-y-auto custom-scroll bg-black/20 rounded-lg" id="dayList">
+                            <!-- Days -->
+                        </div>
+                    </div>
+                </div>
+                
+                <button onclick="confirmDateSelection()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-lg font-bold transition-colors">
+                    确定
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Traditional Calendar Data
+        const heavenlyStems = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+        const earthlyBranches = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+        const animals = ['鼠', '牛', '虎', '兔', '龙', '蛇', '马', '羊', '猴', '鸡', '狗', '猪'];
+        const lunarMonths = ['正月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '冬月', '腊月'];
+        const lunarDays = ['初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
+                          '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
+                          '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'];
+        const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+        const weekDaysEn = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+        const monthsEn = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 
+                         'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+        const solarTerms = ['立春', '雨水', '惊蛰', '春分', '清明', '谷雨', '立夏', '小满', '芒种', '夏至', 
+                           '小暑', '大暑', '立秋', '处暑', '白露', '秋分', '寒露', '霜降', '立冬', '小雪', 
+                           '大雪', '冬至', '小寒', '大寒'];
+        
+        let currentDate = new Date(2026, 1, 5); // Default to the date in image
+        let selectedYear = currentDate.getFullYear();
+        let selectedMonth = currentDate.getMonth();
+        let selectedDay = currentDate.getDate();
+
+        // Simplified lunar calculation (for demo purposes)
+        function getLunarDate(date) {
+            const baseDate = new Date(2026, 1, 5); // Known lunar date: 腊月十八
+            const baseLunarMonth = 11; // 腊月 is index 11
+            const baseLunarDay = 17; // 十八 is index 17
+            
+            const diffDays = Math.floor((date - baseDate) / (1000 * 60 * 60 * 24));
+            
+            let lunarMonth = baseLunarMonth;
+            let lunarDay = baseLunarDay + diffDays;
+            
+            // Simplified month rollover (assuming 30 days per month for demo)
+            while (lunarDay >= 30) {
+                lunarDay -= 30;
+                lunarMonth = (lunarMonth + 1) % 12;
+            }
+            while (lunarDay < 0) {
+                lunarDay += 30;
+                lunarMonth = (lunarMonth - 1 + 12) % 12;
+            }
+            
+            return {
+                month: lunarMonths[lunarMonth],
+                day: lunarDays[lunarDay],
+                monthIndex: lunarMonth,
+                dayIndex: lunarDay
+            };
+        }
+
+        function getGanZhi(date) {
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const day = date.getDate();
+            
+            // Simplified GanZhi calculation
+            const stemIndex = (year + month + day) % 10;
+            const branchIndex = (year + month + day) % 12;
+            
+            return {
+                gan: heavenlyStems[stemIndex],
+                zhi: earthlyBranches[branchIndex],
+                animal: animals[branchIndex]
+            };
+        }
+
+        function getSolarTerm(date) {
+            const month = date.getMonth();
+            const day = date.getDate();
+            
+            // Approximate solar terms (simplified)
+            if (day === 3 || day === 4) return solarTerms[month * 2];
+            if (day === 18 || day === 19) return solarTerms[month * 2 + 1];
+            return '';
+        }
+
+        function getNinePeriod(date) {
+            const start = new Date(date.getFullYear(), 0, 1);
+            const diff = Math.floor((date - start) / (1000 * 60 * 60 * 24));
+            const nineIndex = Math.floor(diff / 9) + 1;
+            const dayInNine = (diff % 9) + 1;
+            
+            if (nineIndex <= 9) return `九九第${dayInNine}天`;
+            return '';
+        }
+
+        function getYiJi(date) {
+            const day = date.getDate();
+            const activities = [
+                '安门', '求学', '嫁娶', '祈福', '祭祀', '搬家', '开业', '签约',
+                '出行', '会友', '动土', '装修', '纳财', '安床', '裁衣'
+            ];
+            
+            // Pseudo-random based on date
+            const seed = day * 7 % activities.length;
+            const yi = activities.slice(seed, seed + 4);
+            const ji = activities.slice((seed + 5) % activities.length, (seed + 8) % activities.length);
+            
+            return {
+                yi: yi.join(' '),
+                ji: ji.join(' ')
+            };
+        }
+
+        function getDirections(date) {
+            const directions = ['东', '南', '西', '北', '东南', '西南', '东北', '西北'];
+            const seed = date.getDate() % directions.length;
+            return {
+                xi: directions[seed],
+                gui: directions[(seed + 2) % directions.length],
+                cai: directions[(seed + 4) % directions.length]
+            };
+        }
+
+        function getTimeSlots(date) {
+            const times = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+            const seed = date.getDate() % 12;
+            return times.map((time, i) => ({
+                name: time,
+                lucky: (i + seed) % 3 !== 0
+            }));
+        }
+
+        function updateCalendar() {
+            const page = document.getElementById('calendarPage');
+            
+            // Update basic info
+            document.getElementById('monthEn').textContent = monthsEn[currentDate.getMonth()];
+            document.getElementById('yearDisplay').textContent = currentDate.getFullYear();
+            document.getElementById('monthCn').textContent = (currentDate.getMonth() + 1) + '月';
+            document.getElementById('bigDate').textContent = currentDate.getDate();
+            document.getElementById('weekDay').textContent = weekDays[currentDate.getDay()];
+            document.getElementById('weekDayEn').textContent = weekDaysEn[currentDate.getDay()];
+            
+            // Lunar info
+            const lunar = getLunarDate(currentDate);
+            document.getElementById('lunarMonth').textContent = lunar.month;
+            document.getElementById('lunarDate').textContent = lunar.day;
+            document.getElementById('fullLunar').textContent = `乙巳年${lunar.month}小`;
+            
+            // Solar term
+            const term = getSolarTerm(currentDate);
+            document.getElementById('solarTerm').textContent = term ? lunar.day + term : lunar.day;
+            
+            // Nine periods
+            const nine = getNinePeriod(currentDate);
+            document.getElementById('ninePeriod').textContent = nine;
+            
+            // Yi/Ji
+            const yiji = getYiJi(currentDate);
+            document.getElementById('yiContent').innerHTML = yiji.yi.replace(/ /g, '<br>');
+            document.getElementById('jiContent').innerHTML = yiji.ji.replace(/ /g, '<br>');
+            
+            // GanZhi
+            const gz = getGanZhi(currentDate);
+            document.getElementById('gan').textContent = gz.gan;
+            document.getElementById('zhi').textContent = gz.zhi;
+            
+            // Directions
+            const dir = getDirections(currentDate);
+            document.getElementById('xiShen').textContent = dir.xi;
+            document.getElementById('guiShen').textContent = dir.gui;
+            document.getElementById('caiShen').textContent = dir.cai;
+            
+            // Time slots
+            const slots = getTimeSlots(currentDate);
+            const slotsHtml = slots.map(slot => 
+                `<div class="time-slot ${slot.lucky ? 'lucky' : ''}">${slot.name}</div>`
+            ).join('');
+            document.getElementById('timeSlots').innerHTML = slotsHtml;
+        }
+
+        function changeDate(days) {
+            const page = document.getElementById('calendarPage');
+            
+            // Add flip animation
+            page.classList.add(days > 0 ? 'flipping-next' : 'flipping-prev');
+            
+            setTimeout(() => {
+                currentDate.setDate(currentDate.getDate() + days);
+                updateCalendar();
+            }, 400);
+            
+            setTimeout(() => {
+                page.classList.remove('flipping-next', 'flipping-prev');
+            }, 800);
+        }
+
+        function goToToday() {
+            currentDate = new Date();
+            const page = document.getElementById('calendarPage');
+            page.classList.add('flipping-next');
+            
+            setTimeout(() => {
+                updateCalendar();
+            }, 400);
+            
+            setTimeout(() => {
+                page.classList.remove('flipping-next');
+            }, 800);
+        }
+
+        // Date Picker Functions
+        function openDatePicker() {
+            selectedYear = currentDate.getFullYear();
+            selectedMonth = currentDate.getMonth();
+            selectedDay = currentDate.getDate();
+            
+            populatePicker();
+            document.getElementById('datePickerModal').classList.remove('hidden');
+        }
+
+        function closeDatePicker() {
+            document.getElementById('datePickerModal').classList.add('hidden');
+        }
+
+        function populatePicker() {
+            // Years (2020-2030)
+            const yearList = document.getElementById('yearList');
+            yearList.innerHTML = '';
+            for (let y = 2020; y <= 2030; y++) {
+                const div = document.createElement('div');
+                div.className = `picker-item p-3 text-center text-white ${y === selectedYear ? 'selected' : ''}`;
+                div.textContent = y + '年';
+                div.onclick = () => { selectedYear = y; populatePicker(); };
+                yearList.appendChild(div);
+            }
+            
+            // Months
+            const monthList = document.getElementById('monthList');
+            monthList.innerHTML = '';
+            for (let m = 0; m < 12; m++) {
+                const div = document.createElement('div');
+                div.className = `picker-item p-3 text-center text-white ${m === selectedMonth ? 'selected' : ''}`;
+                div.textContent = (m + 1) + '月';
+                div.onclick = () => { selectedMonth = m; populatePicker(); };
+                monthList.appendChild(div);
+            }
+            
+            // Days
+            const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+            const dayList = document.getElementById('dayList');
+            dayList.innerHTML = '';
+            for (let d = 1; d <= daysInMonth; d++) {
+                const div = document.createElement('div');
+                div.className = `picker-item p-3 text-center text-white ${d === selectedDay ? 'selected' : ''}`;
+                div.textContent = d + '日';
+                div.onclick = () => { selectedDay = d; populatePicker(); };
+                dayList.appendChild(div);
+            }
+            
+            // Scroll to selected
+            setTimeout(() => {
+                yearList.children[selectedYear - 2020]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                monthList.children[selectedMonth]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                dayList.children[selectedDay - 1]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+
+        function confirmDateSelection() {
+            currentDate = new Date(selectedYear, selectedMonth, selectedDay);
+            closeDatePicker();
+            
+            const page = document.getElementById('calendarPage');
+            page.classList.add('flipping-next');
+            
+            setTimeout(() => {
+                updateCalendar();
+            }, 400);
+            
+            setTimeout(() => {
+                page.classList.remove('flipping-next');
+            }, 800);
+        }
+
+        // Initialize
+        updateCalendar();
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') changeDate(-1);
+            if (e.key === 'ArrowRight') changeDate(1);
+            if (e.key === 'Escape') closeDatePicker();
+        });
+
+        // Touch/swipe support
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) changeDate(1);
+            if (touchEndX > touchStartX + 50) changeDate(-1);
+        }
+    </script>
+</body>
+</html>
