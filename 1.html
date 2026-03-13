@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多功能集合 - 独立功能入口</title>
+    <style>
+        body {
+            background-image: url('https://free-img.400040.xyz/4/2026/02/08/69888de882e23.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-color: rgba(0, 0, 0, 0.5);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Microsoft YaHei', sans-serif;
+            padding: 20px;
+        }
+        /* 主功能选择界面 - 直接显示（已修改为全透明） */
+        .source-selector {
+            text-align: center;
+            background: transparent; /* 改为全透明背景 */
+            padding: 40px 30px;
+            border-radius: 20px;
+            backdrop-filter: none; /* 移除磨砂效果 */
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .source-selector h1 {
+            color: white;
+            margin-bottom: 10px;
+            font-size: 24px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .source-selector h3 {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 30px;
+            font-size: 16px;
+            font-weight: normal;
+        }
+        .source-btn {
+            background-color: #FF69B4;
+            border: none;
+            color: white;
+            padding: 15px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 10px;
+            margin: 0 0 20px 0;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .source-btn:hover {
+            background-color: #FF1493;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .source-btn:active {
+            transform: translateY(0);
+        }
+        .source-btn:nth-child(3) { /* 随机小姐姐1 */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .source-btn:nth-child(4) { /* 随机小姐姐2 */
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .source-btn:nth-child(5) { /* 淘宝买家秀 */
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .source-btn:nth-child(6) { /* 丝袜小姐姐图集 */
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        .btn-icon {
+            font-size: 20px;
+        }
+        .video-container {
+            position: relative;
+            width: 90%;
+            max-width: 600px;
+            margin-top: 20px;
+            display: none;
+        }
+        .video-container video {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            background: #000;
+            display: block;
+        }
+        .btn-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+        .ctrl-btn {
+            padding: 10px 20px;
+            background: rgba(255, 105, 180, 0.8);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+            backdrop-filter: blur(5px);
+        }
+        .ctrl-btn:hover {
+            background: rgba(255, 105, 180, 1);
+        }
+        #switchSourceBtn {
+            background: rgba(30, 144, 255, 0.8);
+        }
+        #switchSourceBtn:hover {
+            background: rgba(30, 144, 255, 1);
+        }
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 16px;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        /* 淘宝买家秀模式的样式 */
+        .taobao-mode {
+            display: none; /* 默认隐藏 */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f0f2f5;
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .taobao-container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .taobao-image-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .taobao-image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .taobao-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #666;
+        }
+        .taobao-spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        .taobao-error {
+            color: #e74c3c;
+            text-align: center;
+            padding: 20px;
+        }
+        .taobao-button-container {
+            padding: 20px;
+            text-align: center;
+        }
+        .taobao-next-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .taobao-next-btn:hover {
+            background: #2980b9;
+        }
+        .taobao-next-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        .taobao-back-btn {
+            margin-top: 20px;
+            background: rgba(100, 100, 100, 0.8);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .taobao-back-btn:hover {
+            background: rgba(70, 70, 70, 0.8);
+        }
+        /* 丝袜小姐姐图集界面样式 */
+        .sister-image-mode {
+            display: none; /* 默认隐藏 */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+            color: white;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        .sister-image-mode h1 {
+            font-size: 22px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .img-btn-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .btn-next {
+            padding: 12px 40px;
+            font-size: 18px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            font-weight: bold;
+            background: linear-gradient(to right, #12c2e9, #c471ed, #f64f59);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .btn-next:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .btn-next:active {
+            transform: translateY(-1px);
+        }
+        .btn-next:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        #image-container {
+            width: 90%;
+            max-width: 600px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-top: 5px;
+            margin-bottom: 20px;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+        }
+        #image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .loading, .error {
+            font-size: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+        .loading { color: #ccc; }
+        .error { color: #ff9d8e; font-weight: bold; }
+        .counter {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 10px;
+        }
+        
+        /* 返回主界面按钮样式 */
+        .back-to-home-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            font-weight: bold;
+            background: linear-gradient(to right, #4A00E0, #8E2DE2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 101;
+        }
+        .back-to-home-btn:hover {
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+    </style>
+</head>
+<body>
+    <!-- 主功能选择界面 - 直接显示 -->
+    <div class="source-selector" id="sourceSelector">
+        <h1>多功能集合平台</h1>
+        <h3>请选择您要使用的功能</h3>
+        <button class="source-btn" id="source1Btn">
+            <span class="btn-icon">🎥</span> 随机小姐姐1 视频
+        </button>
+        <button class="source-btn" id="source2Btn">
+            <span class="btn-icon">🎬</span> 随机小姐姐2 视频
+        </button>
+        <button class="source-btn" id="taobaoBtn">
+            <span class="btn-icon">🛍️</span> 淘宝买家秀
+        </button>
+        <button class="source-btn" id="imageBtn">
+            <span class="btn-icon">👠</span> 丝袜小姐姐图集
+        </button>
+    </div>
+    <!-- 视频播放容器 -->
+    <div class="video-container" id="videoContainer">
+        <video id="videoPlayer" muted playsinline></video>
+        <div class="btn-container">
+            <button class="ctrl-btn" id="nextBtn">换一个视频</button>
+            <button class="ctrl-btn" id="switchSourceBtn">返回主页</button>
+            <button class="ctrl-btn" id="muteBtn">静音</button>
+        </div>
+        <div id="loading">正在加载...</div>
+    </div>
+    <!-- 淘宝买家秀界面 -->
+    <div class="taobao-mode" id="taobaoMode">
+        <div class="taobao-container">
+            <div class="taobao-image-container">
+                <div id="taobaoLoading" class="taobao-loading" style="display: block;">
+                    <div class="taobao-spinner"></div>
+                    <p>正在加载图片...</p>
+                </div>
+                
+                <div id="taobaoError" class="taobao-error" style="display: none;">
+                    加载失败，请重试
+                </div>
+                
+                <img id="taobaoImage" alt="淘宝买家秀" style="display: none;">
+            </div>
+            
+            <div class="taobao-button-container">
+                <button id="taobaoNextBtn" class="taobao-next-btn">下一张</button>
+            </div>
+        </div>
+        <button class="back-to-home-btn" id="taobaoBackBtn">返回主页</button>
+    </div>
+    <!-- 丝袜小姐姐图集界面 -->
+    <div class="sister-image-mode" id="sisterImageMode">
+        <h1>丝袜小姐姐图集</h1>
+        <div class="img-btn-container">
+            <button class="btn-next" id="img-next-btn">点击下一张</button>
+            <div class="counter" id="img-counter">已加载: 0 张</div>
+        </div>
+        <div id="image-container">
+            <div class="loading">点击上方按钮加载图片...</div>
+        </div>
+        <button class="back-to-home-btn" id="img-back-to-video-btn">返回主页</button>
+    </div>
+    <script>
+        // DOM元素获取
+        const sourceSelector = document.getElementById('sourceSelector');
+        const source1Btn = document.getElementById('source1Btn');
+        const source2Btn = document.getElementById('source2Btn');
+        const taobaoBtn = document.getElementById('taobaoBtn');
+        const imageBtn = document.getElementById('imageBtn');
+        
+        const videoContainer = document.getElementById('videoContainer');
+        const video = document.getElementById('videoPlayer');
+        const nextBtn = document.getElementById('nextBtn');
+        const switchSourceBtn = document.getElementById('switchSourceBtn');
+        const muteBtn = document.getElementById('muteBtn');
+        const loading = document.getElementById('loading');
+        
+        const sisterImageMode = document.getElementById('sisterImageMode');
+        const imgBackToVideoBtn = document.getElementById('img-back-to-video-btn');
+        const imgNextBtn = document.getElementById('img-next-btn');
+        const imgCounter = document.getElementById('img-counter');
+        const imageContainer = document.getElementById('image-container');
+        
+        const taobaoMode = document.getElementById('taobaoMode');
+        const taobaoImageElement = document.getElementById('taobaoImage');
+        const taobaoLoadingElement = document.getElementById('taobaoLoading');
+        const taobaoErrorElement = document.getElementById('taobaoError');
+        const taobaoNextBtn = document.getElementById('taobaoNextBtn');
+        const taobaoBackBtn = document.getElementById('taobaoBackBtn');
+        // 状态变量
+        let isLoading = false;
+        let isMuted = false;
+        let currentSource = null;
+        let isTaobaoLoading = false;
+        let isVideoPlaying = false;
+        
+        // 图片加载相关变量
+        const CORS_PROXY = 'https://corsproxy.io/?';
+        let imgLoadCount = 0;
+        // API接口定义
+        const apiSource1 = 'https://api.lolimi.cn/API/xjj/xjj';
+        const apiSource2 = 'https://api.kuleu.com/api/MP4_xiaojiejie?type=json'; // 已替换为目标接口
+        const taobaoApiUrl = 'https://yunapi.cn/api/sjtbmjx';
+        // 视频加载和播放函数
+        async function loadAndPlayVideo() {
+            if (isLoading || !currentSource) return;
+            isLoading = true;
+            loading.style.display = 'block';
+            try {
+                const targetApi = currentSource === 'source1' ? apiSource1 : apiSource2;
+                console.log(`正在请求视频源: ${targetApi} (当前来源: ${currentSource})`);
+                let videoUrl = '';
+                if (currentSource === 'source1') {
+                    videoUrl = targetApi + '?t=' + new Date().getTime();
+                } else {
+                    console.log('开始请求接口:', targetApi);
+                    const response = await fetch(targetApi);
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('接口请求失败:', {
+                            status: response.status,
+                            statusText: response.statusText,
+                            response: errorText
+                        });
+                        throw new Error(`接口请求失败: ${response.status} ${response.statusText}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('接口返回的数据:', data);
+                    
+                    // 适配目标接口返回格式：code=200，视频地址在mp4_video字段
+                    if (data.code === 200 && data.mp4_video) {
+                        videoUrl = data.mp4_video;
+                    } else {
+                        console.error('无法识别的接口返回格式:', data);
+                        throw new Error('接口返回格式不符合预期，无法提取视频地址');
+                    }
+                    
+                    console.log('成功提取视频地址:', videoUrl);
+                }
+                console.log(`最终获取的视频地址: ${videoUrl}`);
+                
+                if (!videoUrl) {
+                    throw new Error('未能获取到有效的视频地址');
+                }
+                video.pause();
+                video.src = videoUrl;
+                video.muted = isMuted;
+                video.onerror = null;
+                video.onloadeddata = null;
+                video.oncanplaythrough = null;
+                const loadTimeout = setTimeout(() => {
+                    if (isLoading) {
+                        console.warn('视频加载超时');
+                        isLoading = false;
+                        loading.style.display = 'none';
+                        alert('视频加载超时，请重试');
+                    }
+                }, 15000);
+                video.onloadeddata = () => {
+                    clearTimeout(loadTimeout);
+                    console.log('视频数据已加载，开始播放');
+                    video.play().then(() => {
+                        isVideoPlaying = true;
+                        isLoading = false;
+                        loading.style.display = 'none';
+                    }).catch(e => {
+                        console.log("自动播放被阻止:", e);
+                        isLoading = false;
+                        loading.style.display = 'none';
+                        alert('视频已加载，请点击视频播放按钮');
+                    });
+                };
+                video.oncanplaythrough = () => {
+                    clearTimeout(loadTimeout);
+                    console.log('视频可以流畅播放');
+                    isLoading = false;
+                    loading.style.display = 'none';
+                };
+                video.onerror = (e) => {
+                    clearTimeout(loadTimeout);
+                    console.error('视频播放错误:', e);
+                    console.error('视频错误详情:', video.error);
+                    console.error('视频URL:', videoUrl);
+                    
+                    isLoading = false;
+                    loading.style.display = 'none';
+                    isVideoPlaying = false;
+                    
+                    let errorMsg = '视频加载失败';
+                    // 结合报错信息：若为文件类型不支持，单独提示
+                    if (video.error && video.error.code === 3) {
+                        errorMsg = '视频解码失败，当前不支持该文件类型，请重试';
+                    } else if (video.error) {
+                        switch(video.error.code) {
+                            case 1: errorMsg = '视频加载被中止'; break;
+                            case 2: errorMsg = '网络错误导致视频加载失败'; break;
+                            case 4: errorMsg = '视频格式不支持或损坏'; break;
+                        }
+                    }
+                    alert(`${errorMsg}，请重试或切换来源`);
+                };
+            } catch (error) {
+                console.error('播放过程出错:', error);
+                console.error('错误堆栈:', error.stack);
+                isLoading = false;
+                loading.style.display = 'none';
+                isVideoPlaying = false;
+                alert('播放失败: ' + error.message);
+            }
+        }
+        // 丝袜小姐姐图集图片加载函数
+        async function loadRandomImage() {
+            const container = document.getElementById('image-container');
+            container.innerHTML = '<div class="loading">客官别急...</div>';
+            imgNextBtn.disabled = true;
+            imgNextBtn.textContent = '客官别急...';
+            const types = ['white', 'black'];
+            const randomType = types[Math.floor(Math.random() * types.length)];
+            const apiUrl = `https://api.lolimi.cn/API/meizi/api?type=${randomType}&_t=${Date.now()}`;
+            try {
+                const apiResponse = await fetch(apiUrl);
+                if (!apiResponse.ok) throw new Error(`接口请求失败: ${apiResponse.status}`);
+                
+                const jsonData = await apiResponse.json();
+                console.log('图片接口返回数据:', jsonData);
+                if (jsonData.code === 1 && jsonData.text) {
+                    const realImageUrl = jsonData.text;
+                    const proxyImageUrl = CORS_PROXY + encodeURIComponent(realImageUrl);
+                    
+                    const img = new Image();
+                    img.onload = function() {
+                        container.innerHTML = '';
+                        container.appendChild(img);
+                        imgLoadCount++;
+                        imgCounter.textContent = `已加载: ${imgLoadCount} 张`;
+                        imgNextBtn.disabled = false;
+                        imgNextBtn.textContent = '点击下一张';
+                    };
+                    img.onerror = function() {
+                        console.warn('代理加载失败，尝试直接加载...');
+                        const imgDirect = new Image();
+                        imgDirect.onload = function() {
+                            container.innerHTML = '';
+                            container.appendChild(imgDirect);
+                            imgLoadCount++;
+                            imgCounter.textContent = `已加载: ${imgLoadCount} 张`;
+                            imgNextBtn.disabled = false;
+                            imgNextBtn.textContent = '点击下一张';
+                        };
+                        imgDirect.onerror = function() {
+                            container.innerHTML = '<div class="error">图片加载失败，请重试</div>';
+                            imgNextBtn.disabled = false;
+                            imgNextBtn.textContent = '点击下一张';
+                        };
+                        imgDirect.src = realImageUrl;
+                    };
+                    img.src = proxyImageUrl;
+                } else {
+                    throw new Error('接口返回数据格式异常');
+                }
+            } catch (error) {
+                console.error('图片加载出错:', error);
+                container.innerHTML = '<div class="error">加载失败，请检查网络后重试</div>';
+                imgNextBtn.disabled = false;
+                imgNextBtn.textContent = '点击下一张';
+            }
+        }
+        // 淘宝买家秀图片加载函数
+        function loadTaobaoImage() {
+            if (isTaobaoLoading) return;
+            
+            isTaobaoLoading = true;
+            taobaoNextBtn.disabled = true;
+            taobaoNextBtn.textContent = '加载中...';
+            taobaoLoadingElement.style.display = 'block';
+            taobaoErrorElement.style.display = 'none';
+            taobaoImageElement.style.display = 'none';
+            
+            try {
+                const img = new Image();
+                const timestamp = Date.now();
+                const imageUrl = `${taobaoApiUrl}?t=${timestamp}`;
+                
+                img.onload = () => {
+                    taobaoImageElement.src = imageUrl;
+                    taobaoImageElement.style.display = 'block';
+                    taobaoErrorElement.style.display = 'none';
+                    
+                    isTaobaoLoading = false;
+                    taobaoNextBtn.disabled = false;
+                    taobaoNextBtn.textContent = '下一张';
+                    taobaoLoadingElement.style.display = 'none';
+                };
+                
+                img.onerror = () => {
+                    taobaoErrorElement.style.display = 'block';
+                    taobaoLoadingElement.style.display = 'none';
+                    
+                    isTaobaoLoading = false;
+                    taobaoNextBtn.disabled = false;
+                    taobaoNextBtn.textContent = '下一张';
+                };
+                
+                img.src = imageUrl;
+                
+            } catch (error) {
+                taobaoErrorElement.style.display = 'block';
+                taobaoLoadingElement.style.display = 'none';
+                
+                isTaobaoLoading = false;
+                taobaoNextBtn.disabled = false;
+                taobaoNextBtn.textContent = '下一张';
+            }
+        }
+        // --- 事件监听器 ---
+        
+        // 四个独立功能按钮的点击事件
+        source1Btn.addEventListener('click', () => {
+            currentSource = 'source1';
+            sourceSelector.style.display = 'none';
+            videoContainer.style.display = 'block';
+            loadAndPlayVideo();
+        });
+        source2Btn.addEventListener('click', () => {
+            currentSource = 'source2';
+            sourceSelector.style.display = 'none';
+            videoContainer.style.display = 'block';
+            loadAndPlayVideo();
+        });
+        taobaoBtn.addEventListener('click', () => {
+            sourceSelector.style.display = 'none';
+            taobaoMode.style.display = 'flex';
+            loadTaobaoImage();
+        });
+        imageBtn.addEventListener('click', () => {
+            sourceSelector.style.display = 'none';
+            sisterImageMode.style.display = 'flex';
+            loadRandomImage(); // 进入时自动加载第一张图片
+        });
+        // 视频界面控制按钮
+        nextBtn.addEventListener('click', loadAndPlayVideo);
+        switchSourceBtn.addEventListener('click', () => {
+            videoContainer.style.display = 'none';
+            sourceSelector.style.display = 'block';
+            
+            if (video.src && video.src !== '' && !video.paused) {
+                video.pause();
+                isVideoPlaying = false;
+            }
+        });
+        muteBtn.addEventListener('click', () => {
+            isMuted = !isMuted;
+            video.muted = isMuted;
+            muteBtn.textContent = isMuted ? '取消静音' : '静音';
+        });
+        // 丝袜图集界面控制
+        imgNextBtn.addEventListener('click', loadRandomImage);
+        imgBackToVideoBtn.addEventListener('click', () => {
+            sisterImageMode.style.display = 'none';
+            sourceSelector.style.display = 'block';
+        });
+        // 淘宝买家秀界面控制
+        taobaoNextBtn.addEventListener('click', loadTaobaoImage);
+        taobaoBackBtn.addEventListener('click', () => {
+            taobaoMode.style.display = 'none';
+            sourceSelector.style.display = 'block';
+        });
+        // 视频事件监听
+        video.addEventListener('ended', () => {
+            isVideoPlaying = false;
+            loadAndPlayVideo();
+        });
+        video.addEventListener('play', () => {
+            isVideoPlaying = true;
+        });
+        video.addEventListener('pause', () => {
+            isVideoPlaying = false;
+        });
+        // 键盘快捷键支持
+        document.addEventListener('keydown', (event) => {
+            // 在丝袜图集界面：空格键或右箭头键切换图片
+            if (sisterImageMode.style.display === 'flex') {
+                if (event.code === 'Space' || event.code === 'ArrowRight') {
+                    if (!imgNextBtn.disabled) {
+                        event.preventDefault();
+                        loadRandomImage();
+                    }
+                }
+            }
+            
+            // 在淘宝买家秀界面：空格键或右箭头键切换图片
+            if (taobaoMode.style.display === 'flex') {
+                if (event.code === 'Space' || event.code === 'ArrowRight') {
+                    if (!taobaoNextBtn.disabled) {
+                        event.preventDefault();
+                        loadTaobaoImage();
+                    }
+                }
+            }
+            
+            // 在视频播放界面：空格键切换播放/暂停
+            if (videoContainer.style.display === 'block') {
+                if (event.code === 'Space') {
+                    event.preventDefault();
+                    if (video.paused) {
+                        video.play();
+                    } else {
+                        video.pause();
+                    }
+                }
+            }
+            
+            // 通用返回：ESC键返回主页
+            if (event.code === 'Escape') {
+                if (videoContainer.style.display === 'block') {
+                    videoContainer.style.display = 'none';
+                    sourceSelector.style.display = 'block';
+                    if (!video.paused) video.pause();
+                } else if (sisterImageMode.style.display === 'flex') {
+                    sisterImageMode.style.display = 'none';
+                    sourceSelector.style.display = 'block';
+                } else if (taobaoMode.style.display === 'flex') {
+                    taobaoMode.style.display = 'none';
+                    sourceSelector.style.display = 'block';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
