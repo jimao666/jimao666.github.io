@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>同创装饰公司 - 官方网站</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        body {
+            color: #333;
+            background-color: #f8f8f8;
+        }
+        /* 顶部导航 */
+        .navbar {
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+        .nav-container {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #c0392b;
+        }
+        .nav-links a {
+            display: none;
+        }
+        /* Banner 区域 */
+        .banner {
+            height: 60vh;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url("https://images.pexels.com/photos/271816/pexels-photo-271816.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1") center/cover no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 0 20px;
+        }
+        .banner-content h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        .banner-content p {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .btn {
+            padding: 12px 30px;
+            background: #c0392b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        /* 通用容器 */
+        .container {
+            width: 100%;
+            margin: 40px 0;
+            padding: 0 20px;
+        }
+        .section-title {
+            text-align: center;
+            font-size: 26px;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+        /* 公司介绍 */
+        .about {
+            background: #fff;
+            padding: 30px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        /* 团队区域 */
+        .team {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .team-card {
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .team-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+        }
+        .team-info {
+            padding: 20px;
+            text-align: center;
+        }
+        .team-info h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #c0392b;
+        }
+        .team-info p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+        .tel {
+            color: #c0392b;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        /* 施工现场 */
+        .projects {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .project-card {
+            width: 100%;
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .project-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        /* 施工视频 */
+        .video-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .video-container iframe {
+            width: 100%;
+            height: 220px;
+            border: none;
+            border-radius: 8px;
+        }
+        /* 联系我们 */
+        .contact {
+            background: #fff;
+            padding: 30px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .contact p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        /* 页脚 */
+        .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">同创装饰</div>
+            <div class="nav-links">
+                <a href="#home">首页</a>
+                <a href="#about">公司介绍</a>
+                <a href="#team">核心团队</a>
+                <a href="#projects">施工现场</a>
+                <a href="#video">施工视频</a>
+                <a href="#contact">联系我们</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Banner 首页 -->
+    <section class="banner" id="home">
+        <div class="banner-content">
+            <h1>同创装饰 · 品质筑家</h1>
+            <p>扛旗人：王浩楠 | 监理：金刚钻 | 项目负责人：一个眼</p>
+            <p>专注家装、工装全案设计与施工</p>
+            <a href="#contact" class="btn">免费咨询</a>
+        </div>
+    </section>
+
+    <!-- 公司介绍 -->
+    <section class="container" id="about">
+        <h2 class="section-title">公司介绍</h2>
+        <div class="about">
+            <p>同创装饰公司是一家集专业设计、精确施工、售后服务为一体的现代化装饰企业。</p>
+            <br>
+            <p>我们专注于家庭装修、旧房改造、办公室及商铺装修等全案服务。坚持<strong>透明报价、闭口合同、零增项</strong>的服务承诺，以标准化的施工工艺、严选的环保材料、闭环的监理体系，为每一位客户打造安心、环保、高颜值的理想空间。</p>
+        </div>
+    </section>
+
+    <!-- 核心团队 -->
+    <section class="container" id="team">
+        <h2 class="section-title">核心团队</h2>
+        <div class="team">
+
+            <!-- 扛旗人：王浩楠 -->
+            <div class="team-card">
+                <img src="https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="王浩楠" class="team-img">
+                <div class="team-info">
+                    <h3>扛旗人 · 王浩楠</h3>
+                    <p><strong>职位：</strong>创始人/总经理</p>
+                    <p><strong>简介：</strong>深耕装饰行业10+年，擅长全案落地与项目统筹。坚持“先做人、后做事”，以责任与口碑带队，严控设计、施工、交付全流程，是同创装饰的品质掌舵人。</p>
+                    <p class="tel">联系电话：138 1234 5678</p>
+                </div>
+            </div>
+
+            <!-- 监理：金刚钻 -->
+            <div class="team-card">
+                <img src="https://images.pexels.com/photos/3992653/pexels-photo-3992653.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="金刚钻" class="team-img">
+                <div class="team-info">
+                    <h3>监理 · 金刚钻</h3>
+                    <p><strong>职位：</strong>工程总监理</p>
+                    <p><strong>简介：</strong>持证监理，专注工地质量与安全管控，严抓水电、防水、瓦木油等节点验收，不讲情面、只讲标准，以“金刚钻”般专业，守住每一户工程质量底线。</p>
+                    <p class="tel">联系电话：138 1234 5679</p>
+                </div>
+            </div>
+
+            <!-- 项目负责人：一个眼 -->
+            <div class="team-card">
+                <img src="https://images.pexels.com/photos/735911/pexels-photo-735911.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="一个眼" class="team-img">
+                <div class="team-info">
+                    <h3>项目负责人 · 一个眼</h3>
+                    <p><strong>职位：</strong>现场项目总负责</p>
+                    <p><strong>简介：</strong>多年工地管理经验，细节控、效率派，一眼看透工艺问题，全程驻场协调，确保工期、质量、安全同步达标，让业主省心放心。</p>
+                    <p class="tel">联系电话：138 1234 5670</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 施工现场 -->
+    <section class="container" id="projects">
+        <h2 class="section-title">施工现场</h2>
+        <div class="projects">
+            <div class="project-card"><img src="https://images.pexels.com/photos/186077/pexels-photo-186077.jpeg?auto=compress&cs=tinysrgb&w=1260" alt="水电施工" class="project-img"></div>
+            <div class="project-card"><img src="https://images.pexels.com/photos/280229/pexels-photo-280229.jpeg?auto=compress&cs=tinysrgb&w=1260" alt="防水闭水" class="project-img"></div>
+            <div class="project-card"><img src="https://images.pexels.com/photos/908284/pexels-photo-908284.jpeg?auto=compress&cs=tinysrgb&w=1260" alt="瓦工铺贴" class="project-img"></div>
+        </div>
+    </section>
+
+    <!-- 施工视频 -->
+    <section class="container" id="video">
+        <h2 class="section-title">施工视频</h2>
+        <div class="video-container">
+            <iframe src="mha.ct.ws/wx_camera_1755681648538.mp4" allowfullscreen></iframe>
+            <p>工地巡检全过程实拍</p>
+        </div>
+    </section>
+
+    <!-- 联系我们 -->
+    <section class="container" id="contact">
+        <h2 class="section-title">联系我们</h2>
+        <div class="contact">
+            <p>咨询电话：<strong>138-1234-5678</strong>（同微信）</p>
+            <p>公司地址：XX市XX区XX路XX号</p>
+            <p>服务范围：家装/旧房改造/商铺/办公室/全屋定制</p>
+            <p>服务承诺：免费量房 · 免费设计方案 · 闭口合同 · 终身维护</p>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <p>© 2026 同创装饰 保留所有权利</p>
+    </footer>
+
+</body>
+</html>
